@@ -3,11 +3,9 @@
 (function () {
   'use strict';
 
-  var csrfMeta = document.querySelector('meta[name="csrf-token"]');
   var state = {
     tokenUrl: @json($tokenUrl),
     configUrl: @json($configUrl),
-    csrf: csrfMeta ? csrfMeta.content : '',
     instance: null,
     booting: false,
     sdkPromise: null
@@ -60,11 +58,6 @@
       return;
     }
 
-    if (!state.csrf) {
-      warn('[landbot-secure] Missing CSRF meta tag.');
-      return;
-    }
-
     state.booting = true;
 
     fetch(state.tokenUrl, {
@@ -81,33 +74,11 @@
         return response.json();
       })
       .then(function (data) {
-        return fetch(state.configUrl, {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': state.csrf
-          },
-          body: JSON.stringify({ token: data.token })
-        });
-      })
-      .then(function (response) {
-        if (!response.ok) {
-          throw new Error('config-request-failed:' + response.status);
-        }
+        var resolvedConfigUrl = state.configUrl + '?token=' + encodeURIComponent(data.token);
 
-        return response.json();
-      })
-      .then(function (botConfig) {
         return loadSdk().then(function () {
-          var blob = new Blob([JSON.stringify(botConfig)], {
-            type: 'application/json'
-          });
-          var blobUrl = URL.createObjectURL(blob);
-
           state.instance = new Landbot.Livechat({
-            configUrl: blobUrl
+            configUrl: resolvedConfigUrl
           });
         });
       })

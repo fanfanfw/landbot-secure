@@ -40,4 +40,12 @@ class LandbotConfigTest extends TestCase
     {
         $this->assertSame('__landbot', Landbot::getRoutePrefix());
     }
+
+    public function test_widget_uses_relative_endpoints(): void
+    {
+        $widget = new LandbotWidget();
+
+        $this->assertSame('/__landbot/token', $widget->tokenUrl);
+        $this->assertSame('/__landbot/config', $widget->configUrl);
+    }
 }

@@ -20,6 +20,6 @@ Route::prefix($prefix)
         Route::get('/token', [LandbotController::class, 'getToken'])
             ->name('token');
 
-        Route::post('/config', [LandbotController::class, 'getConfig'])
+        Route::match(['GET', 'POST'], '/config', [LandbotController::class, 'getConfig'])
             ->name('config');
     });

@@ -12,8 +12,8 @@ This package reduces that risk by:
 
 - Keeping the original `LANDBOT_CONFIG_URL` server-side only
 - Issuing a short-lived one-time token via a Laravel `web` session
-- Requiring CSRF protection for config bootstrap
-- Proxying the Landbot config through Laravel before the SDK is initialized
+- Exposing a local Laravel config endpoint that the Landbot SDK can fetch
+- Proxying the upstream Landbot config through Laravel only after token validation
 
 ## Security Boundary
 
@@ -28,8 +28,6 @@ This package is a hardening layer, not DRM.
 
 - PHP `^8.1`
 - Laravel `^10.0|^11.0|^12.0|^13.0`
-- A standard Laravel layout with `<meta name="csrf-token" content="{{ csrf_token() }}">`
-
 Host PHP minimum still follows the Laravel version you install:
 
 - Laravel 10: PHP 8.1+
@@ -46,12 +44,6 @@ Add your Landbot config URL to `.env`:
 
 ```env
 LANDBOT_CONFIG_URL=https://storage.googleapis.com/landbot.online/v3/H-XXXXXXX-XXXXXXXXXXXXXXXXX/index.json
-```
-
-Ensure your layout has a CSRF meta tag:
-
-```blade
-<meta name="csrf-token" content="{{ csrf_token() }}">
 ```
 
 Render the widget:
@@ -121,9 +113,9 @@ php artisan vendor:publish --tag=landbot-views
 
 1. The browser lazily requests `GET /__landbot/token`.
 2. Laravel stores a hashed one-time token in the session and returns the raw token.
-3. The browser sends the token to `POST /__landbot/config` with CSRF protection.
-4. Laravel validates the session-bound token, fetches the upstream Landbot config, and returns proxied JSON.
-5. The package bootstraps Landbot using a Blob URL so the original upstream `configUrl` is not embedded directly in the page.
+3. The browser initializes `Landbot.Livechat` with a same-origin local config URL such as `/__landbot/config?token=...`.
+4. The Landbot SDK fetches that local config endpoint with the browser session attached.
+5. Laravel validates the session-bound token, fetches the upstream Landbot config, and returns proxied JSON while keeping the original upstream `configUrl` hidden.
 
 ## Testing
 
