@@ -120,6 +120,10 @@
   window.addEventListener('mouseover', bootLandbot, { once: true });
   window.addEventListener('touchstart', bootLandbot, { once: true, passive: true });
   window.addEventListener('scroll', bootLandbot, { once: true, passive: true });
+  window.addEventListener('click', bootLandbot, { once: true, passive: true });
+  window.addEventListener('focus', bootLandbot, { once: true });
+
+  window.setTimeout(bootLandbot, 1500);
 }());
 </script>
 @endif

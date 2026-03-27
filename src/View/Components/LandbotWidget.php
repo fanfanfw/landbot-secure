@@ -18,10 +18,10 @@ class LandbotWidget extends Component
     {
         $this->enabled = (bool) config('landbot.enabled', true);
         $this->tokenUrl = $this->enabled && Route::has('landbot.token')
-            ? route('landbot.token')
+            ? route('landbot.token', [], false)
             : '';
         $this->configUrl = $this->enabled && Route::has('landbot.config')
-            ? route('landbot.config')
+            ? route('landbot.config', [], false)
             : '';
     }
 
